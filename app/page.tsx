@@ -241,7 +241,7 @@ export default function AcaiDaMaryPage() {
           <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
             Os melhores açaís de Nova Carapina com ingredientes selecionados
           </p>
-          <Button
+          {/* <Button
             size="lg"
             className="bg-white text-purple-600 hover:bg-purple-50 text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
             onClick={() =>
@@ -249,7 +249,7 @@ export default function AcaiDaMaryPage() {
             }
           >
             Peça Já pelo WhatsApp
-          </Button>
+          </Button> */}
         </div>
       </section>
 
