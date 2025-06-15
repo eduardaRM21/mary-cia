@@ -1,79 +1,90 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, Star, Instagram, Facebook, MapPin, Clock, Phone, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
+import { 
+  Menu, 
+  X, 
+  Star, 
+  Instagram, 
+  Facebook, 
+  MapPin, 
+  Clock, 
+  Phone, 
+  ChevronLeft, 
+  ChevronRight,
+  MessageSquare,
+  MessageCircle
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { ProductModal } from "@/components/product-modal"
 
 export default function AcaiDaMaryPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
 
   const products = [
     {
-      name: "Açaí Tradicional",
+      name: "Açaí Kids",
       ingredients: "Açaí puro, granola, banana",
       price: "R$ 8,00",
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/images/acai-tradicional.png",
     },
     {
-      name: "Açaí Especial",
-      ingredients: "Açaí, granola, banana, morango, leite condensado",
-      price: "R$ 12,00",
-      image: "/placeholder.svg?height=200&width=300",
+      name: "Açaí 300ml",
+      ingredients: "1 cobertura + 1 fruta + 3 complementos",
+      price: "R$ 10,90",
+      image: "/images/acai-tradicional.png",
+    },
+    { 
+      name: "Açaí 500 ml",
+      ingredients: "1 cobertura + 2 frutas + 3 complementos",
+      price: "R$ 14,50",
+      image: "/images/acai-tradicional.png",
     },
     {
-      name: "Açaí Fitness",
-      ingredients: "Açaí, granola, banana, mel, castanhas",
-      price: "R$ 15,00",
-      image: "/placeholder.svg?height=200&width=300",
+      name: "Açaí 700ml",
+      ingredients: "2 cobertura + 2 frutas + 4 complementos",
+      price: "R$ 20,00",
+      image: "/images/acai-tradicional.png",
     },
     {
-      name: "Açaí Tropical",
-      ingredients: "Açaí, granola, manga, coco ralado, mel",
-      price: "R$ 13,00",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      name: "Açaí Completo",
-      ingredients: "Açaí, granola, banana, morango, kiwi, leite ninho",
-      price: "R$ 18,00",
-      image: "/placeholder.svg?height=200&width=300",
-    },
-    {
-      name: "Açaí Kids",
-      ingredients: "Açaí, granola, banana, chocolate granulado",
-      price: "R$ 10,00",
-      image: "/placeholder.svg?height=200&width=300",
+      name: "Açaí 1 Litro",
+      ingredients: "2 cobertura + 2 frutas + 5 complementos",
+      price: "R$ 29,00",
+      image: "/images/acai-tradicional.png",
     },
   ]
 
   const testimonials = [
     {
-      name: "Maria Silva",
-      text: "Melhor açaí da região! A Mary sempre capricha na qualidade. Já sou cliente há 2 anos!",
-      date: "Janeiro 2025",
+      name: "Caroline",
+      text: "Amei seu açaí, é muito bom! Arrumou uma freguesia boa.",
+      date: "Maio 2025",
       avatar: "/placeholder.svg?height=60&width=60",
     },
     {
-      name: "João Santos",
-      text: "Entrega rápida e produtos fresquinhos. O açaí especial é incrível!",
-      date: "Dezembro 2024",
+      name: "Maria",
+      text: "Perfeitooooo! Muito bom, já devorei kkk",
+      date: "junho 2025",
       avatar: "/placeholder.svg?height=60&width=60",
     },
     {
-      name: "Ana Costa",
-      text: "Variedade incrível de complementos. Meu favorito é o fitness da Mary!",
-      date: "Fevereiro 2025",
+      name: "Elly",
+      text: "Olha, muito bom o açaí! Que era bom viu!",
+      date: "Maio 2025",
       avatar: "/placeholder.svg?height=60&width=60",
     },
     {
-      name: "Pedro Lima",
-      text: "Atendimento excelente e preços justos. Super recomendo o Açaí da Mary!",
-      date: "Janeiro 2025",
+      name: "Cliente",
+      text: "Maravilhoso como sempre! ❤️",
+      date: "Maio 2025",
       avatar: "/placeholder.svg?height=60&width=60",
     },
   ]
@@ -100,8 +111,8 @@ export default function AcaiDaMaryPage() {
     return () => clearInterval(interval)
   }, [testimonials.length])
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id)
     if (element) {
       element.scrollIntoView({ behavior: "smooth" })
     }
@@ -113,8 +124,8 @@ export default function AcaiDaMaryPage() {
   }
 
   const generateWhatsAppLink = (message: string) => {
-    const encodedMessage = encodeURIComponent(message)
-    return `https://wa.me/5527988646488?text=${encodedMessage}`
+    const phoneNumber = "5527988646488"
+    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`
   }
 
   const nextTestimonial = () => {
@@ -139,123 +150,196 @@ export default function AcaiDaMaryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 w-full bg-purple-600 text-white z-40 shadow-lg">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <span className="text-purple-600 font-bold text-sm">🍇</span>
+      {/* Header Container - Mobile Only */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-purple-600">
+        <div className="px-2">
+          {/* Header */}
+          <header className="px-2 py-2">
+            <div className="flex items-center justify-between">
+              {/* Logo e Nome */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                  <Image
+                    src="/assets/logo.png"
+                    width={32}
+                    height={32}
+                    alt="Logo Mary & Cia"
+                    className="rounded-full"
+                    priority
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <h1 className="text-lg font-bold leading-none text-white">MARY & CIA</h1>
+                  <p className="text-xs text-purple-200">Aberto até às 00:30</p>
+                </div>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button className="text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
-            <h1 className="text-xl font-bold">AÇAÍ DA MARY E CIA</h1>
-          </div>
+          </header>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <button onClick={() => scrollToSection("inicio")} className="hover:text-purple-200 transition-colors">
-              Início
-            </button>
-            <button onClick={() => scrollToSection("produtos")} className="hover:text-purple-200 transition-colors">
-              Produtos
-            </button>
-            <button onClick={() => scrollToSection("depoimentos")} className="hover:text-purple-200 transition-colors">
-              Depoimentos
-            </button>
-            <button onClick={() => scrollToSection("contato")} className="hover:text-purple-200 transition-colors">
-              Contato
-            </button>
-            <Button
-              className="bg-white text-purple-600 hover:bg-purple-50"
-              onClick={() =>
-                window.open(
-                  generateWhatsAppLink("Olá! Vim pelo site e gostaria de fazer um pedido no AÇAÍ DA MARY E CIA"),
-                  "_blank",
-                )
-              }
-            >
-              Fazer Pedido
-            </Button>
-          </nav>
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div>
+              <nav className="bg-purple-700 px-2 py-4">
+                <div className="flex flex-col justify-between min-h-[200px]">
+                  {/* Links de Navegação */}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => {
+                        scrollToSection("inicio")
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full flex items-center justify-between px-2 py-3 text-white hover:bg-purple-600 rounded-lg transition-colors"
+                    >
+                      <span className="text-base font-medium">Início</span>
+                      <ChevronRight className="w-5 h-5 text-purple-300" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        scrollToSection("produtos")
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full flex items-center justify-between px-2 py-3 text-white hover:bg-purple-600 rounded-lg transition-colors"
+                    >
+                      <span className="text-base font-medium">Produtos</span>
+                      <ChevronRight className="w-5 h-5 text-purple-300" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        scrollToSection("contato")
+                        setIsMenuOpen(false)
+                      }}
+                      className="w-full flex items-center justify-between px-2 py-3 text-white hover:bg-purple-600 rounded-lg transition-colors"
+                    >
+                      <span className="text-base font-medium">Contato</span>
+                      <ChevronRight className="w-5 h-5 text-purple-300" />
+                    </button>
+                  </div>
 
-          {/* Mobile Menu Button */}
-          <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+                  {/* Área de Contato e Ação */}
+                  <div className="space-y-4 pt-4 border-t border-purple-600">
+                    <Button
+                      className="w-full bg-white hover:bg-purple-50"
+                      onClick={() => {
+                        window.open(
+                          generateWhatsAppLink("Olá! Vim pelo site e gostaria de fazer um pedido no MARY & CIA"),
+                          "_blank"
+                        )
+                        setIsMenuOpen(false)
+                      }}
+                    >
+                      <div className="flex flex-col items-start">
+                        <div className="flex items-center gap-2 text-purple-600">
+                          <MessageCircle className="w-4 h-4" />
+                          <span className="font-medium">WhatsApp</span>
+                        </div>
+                       
+                      </div>
+                    </Button>
+                  </div>
+                </div>
+              </nav>
+            </div>
+          )}
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-purple-700 border-t border-purple-500">
-            <nav className="container mx-auto px-4 py-4 space-y-4">
-              <button
-                onClick={() => scrollToSection("inicio")}
-                className="block w-full text-left hover:text-purple-200"
-              >
-                Início
-              </button>
-              <button
-                onClick={() => scrollToSection("produtos")}
-                className="block w-full text-left hover:text-purple-200"
-              >
-                Produtos
-              </button>
-              <button
-                onClick={() => scrollToSection("depoimentos")}
-                className="block w-full text-left hover:text-purple-200"
-              >
-                Depoimentos
-              </button>
-              <button
-                onClick={() => scrollToSection("contato")}
-                className="block w-full text-left hover:text-purple-200"
-              >
-                Contato
-              </button>
-              <Button
-                className="w-full bg-white text-purple-600 hover:bg-purple-50"
-                onClick={() =>
-                  window.open(
-                    generateWhatsAppLink("Olá! Vim pelo site e gostaria de fazer um pedido no AÇAÍ DA MARY E CIA"),
-                    "_blank",
-                  )
-                }
-              >
-                Fazer Pedido
-              </Button>
-            </nav>
-          </div>
-        )}
-      </header>
+      </div>
 
       {/* Hero Section */}
-      <section id="inicio" className="relative h-screen flex items-center justify-center text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/80 to-purple-800/80 z-10"></div>
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1571115764595-644a1f56a55c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
-          }}
-        ></div>
-        <div className="relative z-20 text-center px-4 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">AÇAÍ DA MARY E CIA</h1>
-          <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
-            Os melhores açaís de Nova Carapina com ingredientes selecionados
-          </p>
-          {/* <Button
-            size="lg"
-            className="bg-white text-purple-600 hover:bg-purple-50 text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all"
-            onClick={() =>
-              window.open(generateWhatsAppLink("Olá AÇAÍ DA MARY E CIA! Gostaria de fazer um pedido"), "_blank")
-            }
-          >
-            Peça Já pelo WhatsApp
-          </Button> */}
+      <section id="inicio" className="md:pt-6 pt-16 bg-gradient-to-b from-purple-600 to-purple-800 text-white">
+        <div className="px-2 md:container md:mx-auto py-6">
+          <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
+            {/* Imagem de Perfil - Visível apenas em Desktop */}
+            <div className="hidden md:block shrink-0">
+              <div className="w-24 h-24 rounded-full overflow-hidden
+              ">
+                <Image
+                  src="/assets/logo.png"
+                  width={96}
+                  height={96}
+                  alt="Logo Mary & Cia"
+                  className="w-full h-full object-cover"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Informações */}
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold mb-1">Açaí da Mary & Cia</h1>
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3 text-purple-100">
+                    <Badge variant="secondary" className="bg-purple-500/30">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Aberto
+                    </Badge>
+                    <span className="text-sm">•</span>
+                    <span className="text-sm">Açaí e Sorvetes</span>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full md:w-auto bg-white text-purple-600 hover:bg-purple-50"
+                  onClick={() =>
+                    window.open(
+                      generateWhatsAppLink("Olá! Vim pelo site e gostaria de fazer um pedido no MARY & CIA"),
+                      "_blank"
+                    )
+                  }
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
+              </div>
+
+              <div className="mt-4 space-y-3 md:space-y-4">
+                {/* Endereço com truncate */}
+                <div className="relative">
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 mt-1 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-purple-100 truncate">
+                        Rua Resplendor, 85, Nova Caparapina I, Serra - ES
+                      </p>
+                      <button 
+                        onClick={() => window.open("https://maps.google.com/?q=Rua Resplendor, 85, Nova Caparapina I, Serra - ES", "_blank")}
+                        className="text-xs text-purple-200 hover:text-white"
+                      >
+                        Ver no mapa
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Horário e Contato */}
+                <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 shrink-0" />
+                    <span className="text-sm text-purple-100">Seg à Sex • 15:00 às 00:00 - Sáb, Dom e Feriados • 12:30 às 00:00</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4 shrink-0" />
+                    <a 
+                      href="tel:+5527988646488"
+                      className="text-sm text-purple-100 hover:text-white"
+                    >
+                      (27) 98864-6488
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Products Section */}
-      <section id="produtos" className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
+      <section id="produtos" className="py-12 bg-gray-50">
+        <div className="px-2 md:container md:mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Nossos Açaís</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {products.map((product, index) => (
@@ -279,14 +363,7 @@ export default function AcaiDaMaryPage() {
                     <span className="text-2xl font-bold text-purple-600">{product.price}</span>
                     <Button
                       className="bg-purple-600 hover:bg-purple-700"
-                      onClick={() =>
-                        window.open(
-                          generateWhatsAppLink(
-                            `Olá! Gostaria de pedir um ${product.name} (${product.price}) - AÇAÍ DA MARY E CIA`,
-                          ),
-                          "_blank",
-                        )
-                      }
+                      onClick={() => setSelectedProduct(product)}
                     >
                       Pedir
                     </Button>
@@ -364,18 +441,18 @@ export default function AcaiDaMaryPage() {
           <p className="text-xl mb-8">Acompanhe nossas novidades e promoções!</p>
           <div className="flex justify-center space-x-8">
             <a
-              href="https://instagram.com/acaidamaryecia"
+              href="https://www.instagram.com/acaimaryecia/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center group"
+              className="flex flex-col justify-center items-center text-center group"
             >
-              <div className="bg-white p-4 rounded-full mb-2 group-hover:bg-pink-500 transition-colors">
+              <div className="bg-white p-4 rounded-full mb-2 group-hover:bg-gradient-to-br from-purple-600 to-pink-500 transition-colors">
                 <Instagram size={32} className="text-purple-600 group-hover:text-white" />
               </div>
               <span className="font-semibold">Instagram</span>
             </a>
             <a
-              href="https://facebook.com/acaidamaryecia"
+              href="https://www.facebook.com/profile.php?id=61576334602116"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center group"
@@ -470,6 +547,14 @@ export default function AcaiDaMaryPage() {
         >
           <ChevronLeft size={20} className="transform rotate-90" />
         </button>
+      )}
+
+      {selectedProduct && (
+        <ProductModal
+          isOpen={!!selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          product={selectedProduct}
+        />
       )}
     </div>
   )
