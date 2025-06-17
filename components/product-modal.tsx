@@ -185,12 +185,14 @@ export function ProductModal({ isOpen, onClose, product }: ProductModalProps) {
       }).join("\n")
     }
 
-    const message = `*Pedido #${orderNumber}*
+    const message = `Olá, gostaria de fazer um pedido!
+
+*Pedido #${orderNumber}*
 
 *${product.name}*
 ${selectedToppings.length > 0 ? `\n*Coberturas:*\n${formatItems(selectedToppings)}` : ""}
-${selectedFruits.length > 0 ? `\n*Frutas:*\n${formatItems(selectedFruits)}` : ""}
 ${selectedExtras.length > 0 ? `\n*Complementos:*\n${formatItems(selectedExtras)}` : ""}
+${selectedFruits.length > 0 ? `\n*Frutas:*\n${formatItems(selectedFruits)}` : ""}
 ${selectedAdditionals.length > 0 ? `\n*Adicionais:*\n${formatItems(selectedAdditionals)}` : ""}
 
 *Dados do Cliente:*
@@ -212,7 +214,7 @@ ${details.deliveryType === 'delivery' ? `\n*Endereço/Localização:*\n${confirm
 *Valor Total: R$ ${totalPrice}*`
 
     const encodedMessage = encodeURIComponent(message)
-    window.open(`https://wa.me/27997202130?text=${encodedMessage}`, "_blank")
+    window.open(`https://wa.me/27988646488?text=${encodedMessage}`, "_blank")
     setIsOrderDetailsModalOpen(false)
     onClose()
   }
@@ -221,7 +223,7 @@ ${details.deliveryType === 'delivery' ? `\n*Endereço/Localização:*\n${confirm
     const newOrderNumber = generateOrderNumber()
     setOrderNumber(newOrderNumber)
     setIsAddressModalOpen(true)
-  }
+  }   
 
   const handleClearSelections = () => {
     setSelectedToppings([])
@@ -234,51 +236,58 @@ ${details.deliveryType === 'delivery' ? `\n*Endereço/Localização:*\n${confirm
     item, 
     type,
     selected,
-    disabled
+    disabled,
+    totalSelected
   }: { 
     item: Topping
     type: 'topping' | 'fruit' | 'extra' | 'additional'
     selected?: SelectedItem
     disabled: boolean
-  }) => (
-    <div className="flex items-center justify-between w-full p-2 border rounded-lg bg-white">
-      <div className="flex flex-col">
-        <span className="font-medium">{item.name}</span>
-        {item.isAdditional && (
-          <span className="text-sm text-gray-500">
-            R$ {item.price?.toFixed(2).replace(".", ",")}
-          </span>
-        )}
+    totalSelected: number
+  }) => {
+    const maxByType = {
+      topping: limits.toppings,
+      fruit: limits.fruits,
+      extra: limits.extras,
+      additional: 100, // limite alto para adicionais pagos
+    }[type]
+  
+    return (
+      <div className="flex items-center justify-between w-full p-2 border rounded-lg bg-white">
+        <div className="flex flex-col">
+          <span className="font-medium">{item.name}</span>
+          {item.isAdditional && (
+            <span className="text-sm text-gray-500">
+              R$ {item.price?.toFixed(2).replace(".", ",")}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleQuantityChange(item, 'decrease', type)}
+            disabled={!selected || selected.quantity <= 0}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+          <span className="w-6 text-center">{selected?.quantity || 0}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleQuantityChange(item, 'increase', type)}
+            disabled={
+              disabled || totalSelected >= maxByType
+            }
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8"
-          onClick={() => handleQuantityChange(item, 'decrease', type)}
-          disabled={!selected || disabled}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <span className="w-6 text-center">{selected?.quantity || 0}</span>
-        <Button
-  variant="outline"
-  size="icon"
-  className="h-8 w-8"
-  onClick={() => handleQuantityChange(item, 'increase', type)}
-  disabled={
-    disabled ||
-    (
-      selected && selected.quantity >= 10 // opcional: trava limite por item
     )
-  }
->
-
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  )
+}
 
   return (
     <>
@@ -319,6 +328,7 @@ ${details.deliveryType === 'delivery' ? `\n*Endereço/Localização:*\n${confirm
                       type="topping"
                       selected={isSelected}
                       disabled={!topping.available || (!isSelected && totalSelected >= limits.toppings)}
+                      totalSelected={totalSelected}
                     />
                   )
                 })}
@@ -334,49 +344,57 @@ ${details.deliveryType === 'delivery' ? `\n*Endereço/Localização:*\n${confirm
 
                   return (
                     <ItemQuantityControl
-                      key={fruit.name}
-                      item={fruit}
-                      type="fruit"
-                      selected={isSelected}
-                      disabled={!fruit.available || (!isSelected && totalSelected >= limits.fruits)}
-                    />
+                    key={fruit.name}
+                    item={fruit}  
+                    type="fruit"
+                    selected={isSelected}
+                    disabled={!fruit.available || (!isSelected && totalSelected >= limits.fruits)}
+                    totalSelected={totalSelected}
+                  />
                   )
                 })}
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">COMPLEMENTOS (Máximo {limits.extras})</h3>
-              <div className="flex flex-col gap-2">
-                {extras.map((extra) => {
-                  const isSelected = selectedExtras.find(e => e.name === extra.name)
-                  const totalSelected = selectedExtras.reduce((sum, e) => sum + e.quantity, 0)
+            <h3 className="text-lg font-semibold mb-3">COMPLEMENTOS (Máximo {limits.extras})</h3>
+  <div className="flex flex-col gap-2">
+    {extras.map((extra) => {
+      const isSelected = selectedExtras.find(e => e.name === extra.name)
+      const totalSelected = selectedExtras.reduce((sum, e) => sum + e.quantity, 0)
 
-                  return (
-                    <ItemQuantityControl
-                      key={extra.name}
-                      item={extra}
-                      type="extra"
-                      selected={isSelected}
-                      disabled={!extra.available || (!isSelected && totalSelected >= limits.extras)}
-                    />
-                  )
-                })}
-              </div>
-            </div>
+      return (
+        <ItemQuantityControl
+          key={extra.name}
+          item={extra}
+          type="extra"
+          selected={isSelected}
+          disabled={!extra.available || (!isSelected && totalSelected >= limits.extras)}
+          totalSelected={totalSelected}
+        />
+      )
+    })}
+  </div>
+</div>
 
             <div>
               <h3 className="text-lg font-semibold mb-3">ADICIONAIS</h3>
               <div className="flex flex-col gap-2">
-                {additionals.map((additional) => (
-                  <ItemQuantityControl
-                    key={additional.name}
-                    item={additional}
-                    type="additional"
-                    selected={selectedAdditionals.find(a => a.name === additional.name)}
-                    disabled={!additional.available}
-                  />
-                ))}
+                {additionals.map((additional) => {
+                  const isSelected = selectedAdditionals.find(a => a.name === additional.name)
+                  const totalSelected = selectedAdditionals.reduce((sum, a) => sum + a.quantity, 0)
+
+                  return (
+                    <ItemQuantityControl
+                      key={additional.name}
+                      item={additional}
+                      type="additional"
+                      selected={isSelected}
+                      disabled={!additional.available}
+                      totalSelected={totalSelected}
+                    />
+                  )
+                })}
               </div>
             </div>
           </div>

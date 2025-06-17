@@ -28,6 +28,7 @@ export default function AcaiDaMaryPage() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
   const products = [
     {
@@ -89,6 +90,29 @@ export default function AcaiDaMaryPage() {
     },
   ]
 
+  const checkIfStoreIsOpen = () => {
+    const now = new Date()
+    const day = now.getDay() // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+    const hours = now.getHours()
+    const minutes = now.getMinutes()
+    const currentTime = hours + minutes / 60
+
+    // Converter para o formato de 24 horas: 15:00 = 15.0, 00:00 = 24.0
+    const weekdayOpen = 15.0 // 15:00
+    const weekdayClose = 24.0 // 00:00
+    const weekendOpen = 12.5 // 12:30
+    const weekendClose = 24.0 // 00:00
+
+    // Verifica se é fim de semana ou feriado (simplificado para verificar apenas fim de semana)
+    const isWeekend = day === 0 || day === 6 // 0 = Domingo, 6 = Sábado
+
+    if (isWeekend) {
+      return currentTime >= weekendOpen && currentTime < weekendClose
+    } else {
+      return currentTime >= weekdayOpen && currentTime < weekdayClose
+    }
+  }
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1500)
 
@@ -96,10 +120,19 @@ export default function AcaiDaMaryPage() {
       setShowScrollTop(window.scrollY > 300)
     }
 
+    // Verifica o status da loja inicialmente e atualiza a cada minuto
+    const checkStoreStatus = () => {
+      setIsOpen(checkIfStoreIsOpen())
+    }
+
+    checkStoreStatus() // Verificação inicial
+    const storeStatusInterval = setInterval(checkStoreStatus, 60000) // Verificar a cada minuto
+
     window.addEventListener("scroll", handleScroll)
 
     return () => {
       clearTimeout(timer)
+      clearInterval(storeStatusInterval)
       window.removeEventListener("scroll", handleScroll)
     }
   }, [])
@@ -141,7 +174,7 @@ export default function AcaiDaMaryPage() {
       <div className="fixed inset-0 bg-purple-600 flex items-center justify-center z-50">
         <div className="text-center text-white">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold">AÇAÍ DA MARY E CIA</h2>
+          <h2 className="text-2xl font-bold">AÇAÍ DA MARY & CIA</h2>
           <p>Carregando...</p>
         </div>
       </div>
@@ -150,10 +183,10 @@ export default function AcaiDaMaryPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header Container - Mobile Only */}
+      {/* Container do Cabeçalho - Apenas para Mobile */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-purple-600">
         <div className="px-2">
-          {/* Header */}
+          {/* Cabeçalho */}
           <header className="px-2 py-2">
             <div className="flex items-center justify-between">
               {/* Logo e Nome */}
@@ -170,18 +203,18 @@ export default function AcaiDaMaryPage() {
                 </div>
                 <div className="flex flex-col">
                   <h1 className="text-lg font-bold leading-none text-white">MARY & CIA</h1>
-                  <p className="text-xs text-purple-200">Aberto até às 00:30</p>
+                  <p className="text-xs text-purple-200">{isOpen ? "Aberto até às 00:00" : "Fechado"}</p>
                 </div>
               </div>
 
-              {/* Mobile Menu Button */}
+              {/* Botão do Menu Mobile */}
               <button className="text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                 {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </header>
 
-          {/* Mobile Navigation */}
+          {/* Navegação Mobile */}
           {isMenuOpen && (
             <div>
               <nav className="bg-purple-700 px-2 py-4">
@@ -248,7 +281,7 @@ export default function AcaiDaMaryPage() {
         </div>
       </div>
 
-      {/* Hero Section */}
+      {/* Seção Principal */}
       <section id="inicio" className="md:pt-6 pt-16 bg-gradient-to-b from-purple-600 to-purple-800 text-white">
         <div className="px-2 md:container md:mx-auto py-6">
           <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
@@ -273,9 +306,9 @@ export default function AcaiDaMaryPage() {
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold mb-1">Açaí da Mary & Cia</h1>
                   <div className="flex flex-wrap items-center gap-2 md:gap-3 text-purple-100">
-                    <Badge variant="secondary" className="bg-purple-500/30">
+                    <Badge variant="secondary" className={`${isOpen ? 'bg-green-500' : 'bg-red-500'}`}>
                       <Clock className="w-3 h-3 mr-1" />
-                      Aberto
+                      {isOpen ? "Aberto" : "Fechado"}
                     </Badge>
                     <span className="text-sm">•</span>
                     <span className="text-sm">Açaí e Sorvetes</span>
@@ -337,7 +370,7 @@ export default function AcaiDaMaryPage() {
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* Seção de Produtos */}
       <section id="produtos" className="py-12 bg-gray-50">
         <div className="px-2 md:container md:mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">Nossos Açaís</h2>
@@ -375,7 +408,7 @@ export default function AcaiDaMaryPage() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Seção de Depoimentos */}
       <section id="depoimentos" className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
@@ -404,7 +437,7 @@ export default function AcaiDaMaryPage() {
               <p className="text-gray-700 text-lg italic">"{testimonials[currentTestimonial].text}"</p>
             </div>
 
-            {/* Navigation Buttons */}
+            {/* Botões de Navegação */}
             <button
               onClick={prevTestimonial}
               className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition-colors"
@@ -418,7 +451,7 @@ export default function AcaiDaMaryPage() {
               <ChevronRight size={20} />
             </button>
 
-            {/* Dots Indicator */}
+            {/* Indicador de Pontos */}
             <div className="flex justify-center mt-6 space-x-2">
               {testimonials.map((_, index) => (
                 <button
@@ -434,10 +467,10 @@ export default function AcaiDaMaryPage() {
         </div>
       </section>
 
-      {/* Social Media Section */}
+      {/* Seção de Mídias Sociais */}
       <section className="py-16 bg-purple-600 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Siga o AÇAÍ DA MARY E CIA nas redes sociais</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Siga o AÇAÍ DA MARY & CIA nas redes sociais</h2>
           <p className="text-xl mb-8">Acompanhe nossas novidades e promoções!</p>
           <div className="flex justify-center space-x-8">
             <a
@@ -466,13 +499,13 @@ export default function AcaiDaMaryPage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Rodapé */}
       <footer id="contato" className="bg-purple-800 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Contact Info */}
+            {/* Informações de Contato */}
             <div>
-              <h3 className="text-xl font-bold mb-4">AÇAÍ DA MARY E CIA</h3>
+              <h3 className="text-xl font-bold mb-4">AÇAÍ DA MARY & CIA</h3>
               <div className="space-y-3">
                 <div className="flex items-start space-x-2">
                   <MapPin size={20} className="mt-1 flex-shrink-0" />
@@ -485,7 +518,7 @@ export default function AcaiDaMaryPage() {
               </div>
             </div>
 
-            {/* Hours */}
+            {/* Horário de Funcionamento */}
             <div>
               <h3 className="text-xl font-bold mb-4 flex items-center">
                 <Clock size={20} className="mr-2" />
@@ -501,7 +534,7 @@ export default function AcaiDaMaryPage() {
               </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Links Rápidos */}
             <div>
               <h3 className="text-xl font-bold mb-4">Links Rápidos</h3>
               <div className="space-y-2">
@@ -534,12 +567,12 @@ export default function AcaiDaMaryPage() {
           </div>
 
           <div className="border-t border-purple-700 mt-8 pt-8 text-center">
-            <p>&copy; 2025 AÇAÍ DA MARY E CIA. Todos os direitos reservados.</p>
+            <p>&copy; 2025 AÇAÍ DA MARY & CIA. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
 
-      {/* Scroll to Top Button */}
+      {/* Botão de Voltar ao Topo */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}

@@ -132,15 +132,21 @@ export function OrderDetailsModal({
               onValueChange={(value: "delivery" | "pickup") => 
                 setDetails(prev => ({ ...prev, deliveryType: value }))
               }
-              className="flex gap-4"
+              className="flex flex-col gap-4"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
                 <RadioGroupItem value="delivery" id="delivery" />
-                <Label htmlFor="delivery">Entrega</Label>
+                <div className="flex flex-col">
+                  <Label htmlFor="delivery" className="font-medium">Entrega</Label>
+                  <span className="text-sm text-gray-500">Aprox. 20 a 45 mins</span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
                 <RadioGroupItem value="pickup" id="pickup" />
-                <Label htmlFor="pickup">Retirada</Label>
+                <div className="flex flex-col">
+                  <Label htmlFor="pickup" className="font-medium">Retirada</Label>
+                  <span className="text-sm text-gray-500">Aprox. 15 a 20 mins</span>
+                </div>
               </div>
             </RadioGroup>
           </div>
